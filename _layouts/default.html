@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% if page.title %}{{ page.title }} | {% endif %}{{ site.title }}</title>
+  <link rel="stylesheet" href="{{ '/assets/css/main.css' | relative_url }}">
+</head>
+<body>
+  <nav>
+    <div class="nav-inner">
+      <a class="site-title" href="{{ '/' | relative_url }}">{{ site.title }}</a>
+      <ul>
+        <li><a href="{{ '/benchmarks/' | relative_url }}"{% if page.url contains 'benchmarks' %} class="active"{% endif %}>Benchmarks</a></li>
+      </ul>
+    </div>
+  </nav>
+  <main>
+    <div class="page-content">
+      {% if page.title and page.url != '/' %}<h1>{{ page.title }}</h1>{% endif %}
+      {{ content }}
+    </div>
+  </main>
+</body>
+</html>
