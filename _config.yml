@@ -1,6 +1,6 @@
 title: AMJax Docs
 url: https://fannymissillier.github.io
-baseurl: "/amjax-docs.github.io"
+baseurl: "/AMJax-docs.github.io"
 
 markdown: kramdown
 permalink: pretty
