@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Documentation | AMJax Docs</title>
+  <link rel="stylesheet" href="/AMJax-docs/assets/css/main.css">
+</head>
+<body>
+  <nav>
+    <div class="nav-inner">
+      <a class="site-title" href="/AMJax-docs/">AMJax Docs</a>
+      <ul>
+        <li><a href="/AMJax-docs/">Benchmarks</a></li>
+        <li><a href="/AMJax-docs/documentation/" class="active">Documentation</a></li>
+      </ul>
+    </div>
+  </nav>
+  <main>
+    <div class="page-content">
+      <h1>Documentation</h1>
+      <h2 id="jax-constraints">JAX constraints</h2>
+
+<p><strong>1. Control flow must be known at compile time:</strong>
+JAX analyzes the entire function before running it and builds a fixed execution plan. Loops and conditionals whose behavior depends on the data cannot be expressed freely: everything must be determined at trace time.</p>
+
+<p><strong>2. Data is immutable:</strong>
+Any modification to an array produces a new array so that the original is left unchanged. For algorithms that update data sequentially, this generates a chain of copies that the compiler cannot optimize efficiently.</p>
+
+<p><strong>3. No side effects inside compiled functions:</strong>
+A JIT-compiled function must be fully self-contained: no writes to external variables, no print statements, no calls to arbitrary Python functions. Only numerical operations on JAX arrays are allowed.</p>
+
+<hr />
+
+<h2 id="feature-table">Feature table</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Feature</th>
+      <th>Implemented</th>
+      <th>Implementable</th>
+      <th>Justification</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>SMOOTHERS</strong></td>
+      <td> </td>
+      <td> </td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td>Jacobi</td>
+      <td>✓</td>
+      <td>—</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td>Gauss-Seidel</td>
+      <td>✗</td>
+      <td>No</td>
+      <td><strong>Problem:</strong> The update of <code class="language-plaintext highlighter-rouge">x_i</code> depends on <code class="language-plaintext highlighter-rouge">x_j^{k+1}</code> for <code class="language-plaintext highlighter-rouge">j &lt; i</code>, which creates an irreducible sequential dependency.<br /><strong>JAX implementation, but:</strong> Implementation via <code class="language-plaintext highlighter-rouge">lax.scan</code> is possible but would produce an O(n) XLA graph, not vectorizable on GPU and so as slow (maybe even slower) than on a CPU.</td>
+    </tr>
+    <tr>
+      <td>SOR</td>
+      <td>✗</td>
+      <td>No</td>
+      <td><strong>Problem:</strong> Gauss-Seidel with <code class="language-plaintext highlighter-rouge">omega</code>, same sequential dependency as GS.<br /><strong>JAX implementation, but:</strong> Same as GS, <code class="language-plaintext highlighter-rouge">lax.scan</code> would produce an O(n) XLA graph not vectorizable on GPU.</td>
+    </tr>
+    <tr>
+      <td>Block Gauss-Seidel</td>
+      <td>✗</td>
+      <td>No</td>
+      <td><strong>Problem:</strong> Same structure as GS, by blocks, there is a sequential inter-block dependency.<br /><strong>JAX implementation, but:</strong> Same as GS, <code class="language-plaintext highlighter-rouge">lax.scan</code> would produce an O(n) XLA graph not vectorizable on GPU.</td>
+    </tr>
+    <tr>
+      <td>Block Jacobi</td>
+      <td>✗</td>
+      <td>Yes</td>
+      <td>Variables are partitioned into independent blocks. Each block update depends only on its own residual, so all blocks can be solved simultaneously. The block inverses are precomputed once at setup as small dense matrices.</td>
+    </tr>
+    <tr>
+      <td>Additive Schwarz</td>
+      <td>✗</td>
+      <td>Yes</td>
+      <td>Local solves are all independent, so all subdomains can be solved simultaneously.<br /><strong>JAX implementation, but:</strong> Subdomains can have different sizes. Since JAX requires fixed array shapes, all subdomains must be padded to the size of the largest one, and a boolean mask used to ignore the padded entries during computation.</td>
+    </tr>
+    <tr>
+      <td>Multiplicative Schwarz</td>
+      <td>✗</td>
+      <td>No</td>
+      <td><strong>Problem:</strong> Each local solve modifies <code class="language-plaintext highlighter-rouge">x</code>, which changes <code class="language-plaintext highlighter-rouge">r = b - Ax</code> for the next subdomain and results in a sequential intra-sweep dependency.<br /><strong>JAX implementation, but:</strong> <code class="language-plaintext highlighter-rouge">lax.scan</code> over subdomains would produce an O(n) XLA graph, not vectorizable on GPU.</td>
+    </tr>
+    <tr>
+      <td>Richardson</td>
+      <td>✗</td>
+      <td>Yes</td>
+      <td>Each iteration computes <code class="language-plaintext highlighter-rouge">r = b - Ax</code> and updates <code class="language-plaintext highlighter-rouge">x += omega * r</code>. This is just one matrix-vector product and vector additions: fully parallel on GPU. <code class="language-plaintext highlighter-rouge">omega = c / rho(A)</code> is fixed and precomputed at setup.</td>
+    </tr>
+    <tr>
+      <td>Chebyshev</td>
+      <td>✗</td>
+      <td>Yes</td>
+      <td>Horner’s rule: <code class="language-plaintext highlighter-rouge">d</code> sequential matmuls with <code class="language-plaintext highlighter-rouge">d</code> static: unrolled at JAX tracing, each matmul parallel. Coefficients precomputed from Chebyshev roots over spectrum interval <code class="language-plaintext highlighter-rouge">[a, b]</code>.</td>
+    </tr>
+    <tr>
+      <td>Jacobi-NE</td>
+      <td>✗</td>
+      <td>Yes</td>
+      <td><code class="language-plaintext highlighter-rouge">x += omega * A^H * D_{AA^H}^{-1} * (b - Ax)</code>: same structure as Jacobi, fully parallel. <code class="language-plaintext highlighter-rouge">D_{AA^H}</code> precomputed at setup.</td>
+    </tr>
+    <tr>
+      <td>Gauss-Seidel-NE</td>
+      <td>✗</td>
+      <td>No</td>
+      <td><strong>Problem:</strong> GS applied to normal equations <code class="language-plaintext highlighter-rouge">A A^H y = b</code>: sequential row by row.<br /><strong>JAX implementation, but:</strong> Same as GS, <code class="language-plaintext highlighter-rouge">lax.scan</code> would produce an O(n) XLA graph, not vectorizable on GPU.</td>
+    </tr>
+    <tr>
+      <td>Gauss-Seidel-NR</td>
+      <td>✗</td>
+      <td>No</td>
+      <td><strong>Problem:</strong> GS applied to <code class="language-plaintext highlighter-rouge">A^H A x = A^H b</code>, sequential column by column.<br /><strong>JAX implementation, but:</strong> Same as GS, <code class="language-plaintext highlighter-rouge">lax.scan</code> would produce an O(n) XLA graph, not vectorizable on GPU.</td>
+    </tr>
+    <tr>
+      <td>CF-Jacobi / FC-Jacobi</td>
+      <td>✗</td>
+      <td>Yes</td>
+      <td>Jacobi applied separately on C-points then F-points (or reverse). Within a group, independent: <code class="language-plaintext highlighter-rouge">jnp.where</code> on static C/F mask. Mask available from PyAMG hierarchy via <code class="language-plaintext highlighter-rouge">lvl.splitting</code>.</td>
+    </tr>
+    <tr>
+      <td>CG as smoother</td>
+      <td>✗</td>
+      <td>Yes</td>
+      <td><code class="language-plaintext highlighter-rouge">jax.scipy.sparse.linalg.cg</code> exists: with fixed static <code class="language-plaintext highlighter-rouge">maxiter</code>, a <code class="language-plaintext highlighter-rouge">lax.fori_loop</code> of CG steps is jit-compilable.</td>
+    </tr>
+    <tr>
+      <td>GMRES as smoother</td>
+      <td>✗</td>
+      <td>Yes</td>
+      <td><code class="language-plaintext highlighter-rouge">jax.scipy.sparse.linalg.gmres</code> exists: same reasoning as CG.</td>
+    </tr>
+    <tr>
+      <td>CGNE / CGNR as smoother</td>
+      <td>✗</td>
+      <td>Yes (effort)</td>
+      <td>Absent from <code class="language-plaintext highlighter-rouge">jax.scipy</code>: require custom JAX implementation. Algorithmically simple (CG on normal equations).</td>
+    </tr>
+    <tr>
+      <td><strong>COARSE SOLVERS</strong></td>
+      <td> </td>
+      <td> </td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td>jacobi</td>
+      <td>✓</td>
+      <td>—</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td>pinv</td>
+      <td>✓</td>
+      <td>—</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td>lu</td>
+      <td>✓</td>
+      <td>—</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td>qr</td>
+      <td>✓</td>
+      <td>—</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td>Cholesky</td>
+      <td>✗</td>
+      <td>Yes</td>
+      <td><code class="language-plaintext highlighter-rouge">jax.scipy.linalg.cho_factor</code> / <code class="language-plaintext highlighter-rouge">cho_solve</code> exist. Same pattern as LU already implemented. Requires SPD matrix.</td>
+    </tr>
+    <tr>
+      <td>pinv2</td>
+      <td>✗</td>
+      <td>Yes</td>
+      <td>pinv2 is just pinv with a rcond parameter to control SVD truncation. <code class="language-plaintext highlighter-rouge">jnp.linalg.pinv</code> already supports rcond, so the current implementation covers both (as it already covers pinv).</td>
+    </tr>
+    <tr>
+      <td>splu (sparse LU)</td>
+      <td>✗</td>
+      <td>No</td>
+      <td><strong>Problem:</strong> <code class="language-plaintext highlighter-rouge">splu</code> relies on SuperLU, an external C library. JAX has no native sparse LU factorization: XLA simply doesn’t support this operation.<br /><strong>JAX implementation, but:</strong> Calling SuperLU via <code class="language-plaintext highlighter-rouge">jax.pure_callback</code> is technically possible, but breaks <code class="language-plaintext highlighter-rouge">vmap</code> and <code class="language-plaintext highlighter-rouge">grad</code>.</td>
+    </tr>
+    <tr>
+      <td>CG</td>
+      <td>✗</td>
+      <td>Yes</td>
+      <td><code class="language-plaintext highlighter-rouge">jax.scipy.sparse.linalg.cg</code> with fixed <code class="language-plaintext highlighter-rouge">maxiter</code>: jit-compilable.</td>
+    </tr>
+    <tr>
+      <td>GMRES</td>
+      <td>✗</td>
+      <td>Yes</td>
+      <td><code class="language-plaintext highlighter-rouge">jax.scipy.sparse.linalg.gmres</code> with fixed <code class="language-plaintext highlighter-rouge">max_iter</code>: jit-compatible.</td>
+    </tr>
+    <tr>
+      <td>BiCGSTAB</td>
+      <td>✗</td>
+      <td>Yes</td>
+      <td><code class="language-plaintext highlighter-rouge">jax.scipy.sparse.linalg.bicgstab</code> with fixed <code class="language-plaintext highlighter-rouge">maxiter</code>: jit-compilable.</td>
+    </tr>
+    <tr>
+      <td>FGMRES</td>
+      <td>✗</td>
+      <td>Yes (very high effort)</td>
+      <td><strong>Problem:</strong> Flexible GMRES requires a variable preconditioner at each iteration.<br /><strong>JAX implementation possible, but:</strong> <code class="language-plaintext highlighter-rouge">jax.scipy.sparse.linalg.gmres</code> doesn’t support this and a custom implementation would be very costly.</td>
+    </tr>
+    <tr>
+      <td><strong>CYCLES</strong></td>
+      <td> </td>
+      <td> </td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td>V-cycle</td>
+      <td>✓</td>
+      <td>—</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td>W-cycle</td>
+      <td>✓</td>
+      <td>—</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td>F-cycle</td>
+      <td>✓</td>
+      <td>—</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td>AMLI</td>
+      <td>✗</td>
+      <td>Partial</td>
+      <td>The cycle itself is implementable but PyAMG requires <code class="language-plaintext highlighter-rouge">accel='fgmres'</code> for AMLI since the preconditioner is nonlinear, without FGMRES in JAX, the cycle cannot be used in practice.</td>
+    </tr>
+    <tr>
+      <td><strong>KRYLOV ACCELERATION</strong></td>
+      <td> </td>
+      <td> </td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td>CG</td>
+      <td>✓</td>
+      <td>—</td>
+      <td><code class="language-plaintext highlighter-rouge">jax.scipy.sparse.linalg.cg(A, b, M=ml.aspreconditioner())</code></td>
+    </tr>
+    <tr>
+      <td>GMRES</td>
+      <td>✓</td>
+      <td>—</td>
+      <td><code class="language-plaintext highlighter-rouge">jax.scipy.sparse.linalg.gmres(A, b, M=ml.aspreconditioner())</code></td>
+    </tr>
+    <tr>
+      <td>BiCGSTAB</td>
+      <td>✓</td>
+      <td>—</td>
+      <td><code class="language-plaintext highlighter-rouge">jax.scipy.sparse.linalg.bicgstab(A, b, M=ml.aspreconditioner())</code></td>
+    </tr>
+    <tr>
+      <td>FGMRES</td>
+      <td>✗</td>
+      <td>Yes (very high effort)</td>
+      <td>Absent from <code class="language-plaintext highlighter-rouge">jax.scipy</code>. <strong>Problem:</strong> Requires a variable preconditioner at each Krylov iteration.<br /><strong>JAX implementation, but:</strong> A custom implementation would be very costly.</td>
+    </tr>
+    <tr>
+      <td><strong>OTHER</strong></td>
+      <td> </td>
+      <td> </td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td>Complex matrices</td>
+      <td>✗</td>
+      <td>Yes</td>
+      <td>JAX supports <code class="language-plaintext highlighter-rouge">complex64</code>/<code class="language-plaintext highlighter-rouge">complex128</code> natively. Required adjustments.</td>
+    </tr>
+    <tr>
+      <td>Residual tracking under jit</td>
+      <td>✗</td>
+      <td>No</td>
+      <td><strong>Problem:</strong> <code class="language-plaintext highlighter-rouge">lax.while_loop</code> allows no Python side effects: <code class="language-plaintext highlighter-rouge">list.append</code> is impossible inside the XLA graph.<br />Possible in debug mode only via <code class="language-plaintext highlighter-rouge">jax.debug.callback</code>, but incompatible with <code class="language-plaintext highlighter-rouge">vmap</code> and <code class="language-plaintext highlighter-rouge">grad</code>.</td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+  </main>
+</body>
+</html>
