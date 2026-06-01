@@ -1,6 +1,5 @@
 ---
 layout: default
-permalink: /
+permalink: /about/
+nav: false
 ---
-
-<script>window.location.replace('/benchmarks/');</script>

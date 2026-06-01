@@ -11,7 +11,7 @@
     <div class="nav-inner">
       <a class="site-title" href="{{ '/' | relative_url }}">{{ site.title }}</a>
       <ul>
-        <li><a href="{{ '/benchmarks/' | relative_url }}"{% if page.url contains 'benchmarks' %} class="active"{% endif %}>Benchmarks</a></li>
+        <li><a href="{{ '/' | relative_url }}"{% if page.url == '/' %} class="active"{% endif %}>Benchmarks</a></li>
       </ul>
     </div>
   </nav>
