@@ -1,4 +1,0 @@
-User-agent: *
-Disallow:
-
-Sitemap: https://amjax-docs.github.io/sitemap.xml

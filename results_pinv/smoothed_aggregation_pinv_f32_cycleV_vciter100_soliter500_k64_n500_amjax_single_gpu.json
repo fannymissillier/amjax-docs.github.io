@@ -1,0 +1,19 @@
+{
+  "config": {
+    "solver": "smoothed_aggregation",
+    "coarse_solver": "pinv",
+    "dtype": "f32",
+    "tol": 1e-10,
+    "maxiter_vcycle": 100,
+    "maxiter_solv": 500,
+    "vmap_k": 64,
+    "cycle_type": "V",
+    "grid_size": 500,
+    "method": "amjax",
+    "smoother": "jacobi",
+    "mode": "single",
+    "device": "gpu"
+  },
+  "time": 0.09862612800009174,
+  "residual": 0.0019530403660610318
+}

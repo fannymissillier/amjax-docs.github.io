@@ -1,0 +1,19 @@
+{
+  "config": {
+    "solver": "rootnode",
+    "coarse_solver": "pinv",
+    "dtype": "f32",
+    "tol": 1e-10,
+    "maxiter_vcycle": 100,
+    "maxiter_solv": 500,
+    "vmap_k": 64,
+    "cycle_type": "V",
+    "grid_size": 500,
+    "method": "pyamg_pcg",
+    "smoother": "jacobi",
+    "mode": "vmap",
+    "device": "gpu"
+  },
+  "time": 54.52104677599891,
+  "residual": 3.1140377416814915e-11
+}
