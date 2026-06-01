@@ -17,10 +17,9 @@ permalink: /benchmarks/
 .bm-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
 .bm-table th { text-align: right; padding: 0.5rem 0.75rem; font-weight: 600; border-bottom: 2px solid #e5e7eb; white-space: nowrap; }
 .bm-table th:first-child { text-align: left; }
-.bm-table td { text-align: right; padding: 0.5rem 0.75rem; font-family: monospace; border-bottom: 1px solid #f3f4f6; }
-.bm-table td.bm-td-label { text-align: left; font-family: inherit; font-weight: 500; white-space: nowrap; }
+.bm-table td { text-align: right; padding: 0.5rem 0.75rem; border-bottom: 1px solid #f3f4f6; }
+.bm-table td.bm-td-label { text-align: left; font-weight: 500; white-space: nowrap; }
 .bm-table tr:nth-child(even) td { background: rgba(0,0,0,0.015); }
-.bm-method-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 0.5rem; vertical-align: middle; }
 .bm-setup-table th:first-child { min-width: 180px; }
 </style>
 
@@ -37,13 +36,14 @@ permalink: /benchmarks/
         <tr><td class="bm-td-label">Max solver iterations</td><td style="text-align:left">500</td></tr>
         <tr><td class="bm-td-label">Max V-cycle iterations</td><td style="text-align:left">100 (per solver call)</td></tr>
         <tr><td class="bm-td-label">Grid sizes</td><td style="text-align:left">n = 50, 100, 200, 500, 1000</td></tr>
-        <tr><td class="bm-td-label">AMG hierarchies</td><td style="text-align:left">Ruge–Stüben, Smoothed Aggregation, Root Node</td></tr>
+        <tr><td class="bm-td-label">AMG hierarchies</td><td style="text-align:left">Ruge-Stüben, Smoothed Aggregation, Root Node</td></tr>
         <tr><td class="bm-td-label">Precision</td><td style="text-align:left">f32, f64</td></tr>
         <tr><td class="bm-td-label">Devices</td><td style="text-align:left">CPU, GPU</td></tr>
         <tr><td class="bm-td-label">Modes</td><td style="text-align:left"><code>single</code> (1 RHS), <code>vmap</code> (k RHS batched)</td></tr>
         <tr><td class="bm-td-label">Batch size (k)</td><td style="text-align:left">64</td></tr>
         <tr><td class="bm-td-label">Methods</td><td style="text-align:left"><code>AMJax</code>, <code>AMJax + PCG</code>, <code>PyAMG</code>, <code>PyAMG + PCG</code></td></tr>
         <tr><td class="bm-td-label">Timing</td><td style="text-align:left">after JIT warm-up (first call excluded)</td></tr>
+        <tr><td class="bm-td-label">Residual metric</td><td style="text-align:left">||b - Ax|| / ||b||</td></tr>
       </tbody>
     </table>
   </div>
@@ -52,54 +52,17 @@ permalink: /benchmarks/
 <hr style="border:none;border-top:1px solid #e5e7eb;margin:2rem 0">
 
 <div class="bm-section">
-  <h2>Solve time vs grid size</h2>
-  <p style="font-size:0.9rem;margin-bottom:1rem">Time per solve after JIT warm-up.</p>
-  <div class="bm-filters" id="filters-chart1"></div>
-  <div class="bm-chart-wrap"><canvas id="chart-solve-time"></canvas></div>
-  <p class="bm-note" id="note-chart1"></p>
+  <h2>Speedup ratios</h2>
+  <div class="bm-filters" id="filters-speedup"></div>
+  <div class="bm-chart-wrap" style="height:320px"><canvas id="chart-speedup"></canvas></div>
 </div>
 
 <hr style="border:none;border-top:1px solid #e5e7eb;margin:2rem 0">
 
 <div class="bm-section">
-  <h2>Speedup over PyAMG</h2>
-  <div class="bm-filters" id="filters-chart2"></div>
-  <div class="bm-chart-wrap" style="height:300px"><canvas id="chart-speedup"></canvas></div>
-  <p class="bm-note" id="note-chart2"></p>
-</div>
-
-<hr style="border:none;border-top:1px solid #e5e7eb;margin:2rem 0">
-
-<div class="bm-section">
-  <h2>Solve times</h2>
-  <p style="font-size:0.9rem;margin-bottom:1rem">Time per solve after JIT warm-up (fastest method per grid size highlighted in blue).</p>
-  <div class="bm-filters" id="filters-table1"></div>
-  <div style="overflow-x:auto"><table class="bm-table" id="table-times"></table></div>
-  <p class="bm-note" id="note-table1"></p>
-</div>
-
-<hr style="border:none;border-top:1px solid #e5e7eb;margin:2rem 0">
-
-<div class="bm-section">
-  <h2>Residuals</h2>
-  <p style="font-size:0.9rem;margin-bottom:1rem">We used the relative residual: ‖b − Ax‖ / ‖b‖</p>
-  <div class="bm-filters" id="filters-table2"></div>
-  <div style="overflow-x:auto"><table class="bm-table" id="table-residuals"></table></div>
-  <p class="bm-note" id="note-table2"></p>
-</div>
-
-<hr style="border:none;border-top:1px solid #e5e7eb;margin:2rem 0">
-
-<div class="bm-section">
-  <h2>Coarse solver : Jacobi vs Pinv</h2>
-  <p style="font-size:0.9rem;margin-bottom:1rem">Comparison of two coarse solvers on Ruge–Stüben, n = 500, single solve, GPU.</p>
-  <div class="bm-filters" id="filters-pinv"></div>
-  <div class="bm-chart-wrap" style="height:320px"><canvas id="chart-pinv"></canvas></div>
-  <p class="bm-note" id="note-pinv"></p>
-  <div style="overflow-x:auto;margin-top:1.5rem"><table class="bm-table" id="table-pinv"></table></div>
-  <p class="bm-note" style="text-align:left;margin-top:0.75rem">
-    <span style="color:#16a34a">Green</span> = converged (&lt;10⁻⁹), <span style="color:#dc2626">red</span> = not converged. AMJax + PCG with pinv (f32) not available.
-  </p>
+  <h2>Residuals: f32 vs f64</h2>
+  <div class="bm-filters" id="filters-residuals"></div>
+  <div class="bm-chart-wrap"><canvas id="chart-residuals"></canvas></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
