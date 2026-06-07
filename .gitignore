@@ -16,3 +16,4 @@ output/playwright/
 test-results/
 vendor
 results_gpu_cpu_single_vmap_f64_rs_sa_rn_50_100_200_500_1000
+results_f32
