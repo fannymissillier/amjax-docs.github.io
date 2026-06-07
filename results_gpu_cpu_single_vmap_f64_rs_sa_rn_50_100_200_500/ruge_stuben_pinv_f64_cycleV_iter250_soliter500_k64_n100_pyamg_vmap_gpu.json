@@ -1,0 +1,20 @@
+{
+  "config": {
+    "solver": "ruge_stuben",
+    "coarse_solver": "pinv",
+    "dtype": "f64",
+    "tol": 1e-08,
+    "maxiter_cycle": 250,
+    "maxiter_solv": 500,
+    "vmap_k": 64,
+    "cycle_type": "V",
+    "grid_size": 100,
+    "method": "pyamg",
+    "smoother": "jacobi",
+    "mode": "vmap",
+    "device": "gpu"
+  },
+  "time": 0.5342202009924222,
+  "residual": 7.758996204173152e-09,
+  "n_iter": null
+}

@@ -1,0 +1,20 @@
+{
+  "config": {
+    "solver": "pairwise",
+    "coarse_solver": "pinv",
+    "dtype": "f64",
+    "tol": 1e-08,
+    "maxiter_cycle": 1500,
+    "maxiter_solv": 500,
+    "vmap_k": 64,
+    "cycle_type": "V",
+    "grid_size": 100,
+    "method": "amjax",
+    "smoother": "jacobi",
+    "mode": "vmap",
+    "device": "cpu"
+  },
+  "time": 20.51914831798058,
+  "residual": 9.804979809445676e-09,
+  "n_iter": null
+}

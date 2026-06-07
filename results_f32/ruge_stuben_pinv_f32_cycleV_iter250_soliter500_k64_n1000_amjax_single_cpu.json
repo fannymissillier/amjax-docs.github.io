@@ -1,0 +1,20 @@
+{
+  "config": {
+    "solver": "ruge_stuben",
+    "coarse_solver": "pinv",
+    "dtype": "f32",
+    "tol": 1e-08,
+    "maxiter_cycle": 250,
+    "maxiter_solv": 500,
+    "vmap_k": 64,
+    "cycle_type": "V",
+    "grid_size": 1000,
+    "method": "amjax",
+    "smoother": "jacobi",
+    "mode": "single",
+    "device": "cpu"
+  },
+  "time": 22.24470864899922,
+  "residual": 0.005480112042278051,
+  "n_iter": null
+}
