@@ -38,7 +38,7 @@
 .bm-setup-table th:first-child { min-width: 180px; }
 </style>
 
-<p>Performance comparison of AMJax against PyAMG on 2D Poisson problems of increasing size (50, 100, 200, 500 and 1000).</p>
+<p>Performance comparison of AMJax against PyAMG on 2D Poisson problems of increasing size (n = 50, 100, 200, 500).</p>
 
 <div class="bm-section">
   <h2>Experimental setup</h2>
@@ -47,18 +47,19 @@
       <thead><tr><th>Parameter</th><th style="text-align:left">Value</th></tr></thead>
       <tbody>
         <tr><td class="bm-td-label">Problem</td><td style="text-align:left">2D Poisson on an n×n grid</td></tr>
-        <tr><td class="bm-td-label">Tolerance</td><td style="text-align:left">10⁻¹⁰</td></tr>
+        <tr><td class="bm-td-label">Tolerance</td><td style="text-align:left">10⁻⁸</td></tr>
         <tr><td class="bm-td-label">Max solver iterations</td><td style="text-align:left">500</td></tr>
-        <tr><td class="bm-td-label">Max V-cycle iterations</td><td style="text-align:left">100 (per solver call)</td></tr>
-        <tr><td class="bm-td-label">Grid sizes</td><td style="text-align:left">n = 50, 100, 200, 500, 1000</td></tr>
-        <tr><td class="bm-td-label">AMG hierarchies</td><td style="text-align:left">Ruge-Stüben, Smoothed Aggregation, Root Node</td></tr>
+        <tr><td class="bm-td-label">Max cycle iterations</td><td style="text-align:left">250 (per solver call)</td></tr>
+        <tr><td class="bm-td-label">Grid sizes</td><td style="text-align:left">n = 50, 100, 200, 500</td></tr>
+        <tr><td class="bm-td-label">AMG hierarchies</td><td style="text-align:left">Ruge-Stüben, Smoothed Aggregation, Root Node, Pairwise</td></tr>
+        <tr><td class="bm-td-label">Cycle types</td><td style="text-align:left">V, F, W</td></tr>
         <tr><td class="bm-td-label">Precision</td><td style="text-align:left">f32, f64</td></tr>
-        <tr><td class="bm-td-label">Devices</td><td style="text-align:left">CPU, GPU</td></tr>
+        <tr><td class="bm-td-label">Devices</td><td style="text-align:left">AMJax on GPU, PyAMG on CPU</td></tr>
         <tr><td class="bm-td-label">Modes</td><td style="text-align:left"><code>single</code> (1 RHS), <code>vmap</code> (k RHS batched)</td></tr>
-        <tr><td class="bm-td-label">Batch size (k)</td><td style="text-align:left">64</td></tr>
+        <tr><td class="bm-td-label">Batch size (k)</td><td style="text-align:left">32, 64</td></tr>
         <tr><td class="bm-td-label">Methods</td><td style="text-align:left"><code>AMJax</code>, <code>AMJax + PCG</code>, <code>PyAMG</code>, <code>PyAMG + PCG</code></td></tr>
         <tr><td class="bm-td-label">Timing</td><td style="text-align:left">after JIT warm-up (first call excluded)</td></tr>
-        <tr><td class="bm-td-label">Residual metric</td><td style="text-align:left">||b - Ax|| / ||b||</td></tr>
+        <tr><td class="bm-td-label">Residual metric</td><td style="text-align:left">||b − Ax|| / ||b||</td></tr>
       </tbody>
     </table>
   </div>

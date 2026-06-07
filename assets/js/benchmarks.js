@@ -17,7 +17,7 @@ const METHOD_COLORS = {
   pyamg: '#16a34a',
   pyamg_pcg: '#65a30d',
 };
-const GRID_SIZES = [50, 100, 200, 500, 1000];
+const GRID_SIZES = [50, 100, 200, 500];
 
 function filterData(solver, dtype, mode, device) {
   return BENCHMARK_DATA.filter(function(e) {
