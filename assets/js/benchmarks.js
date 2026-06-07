@@ -1,8 +1,9 @@
-const SOLVERS = ['rootnode', 'ruge_stuben', 'smoothed_aggregation'];
+const SOLVERS = ['rootnode', 'ruge_stuben', 'smoothed_aggregation', 'pairwise'];
 const SOLVER_LABELS = {
   rootnode: 'Root Node',
   ruge_stuben: 'Ruge-Stüben',
   smoothed_aggregation: 'Smoothed Aggregation',
+  pairwise: 'Pairwise',
 };
 const METHODS = ['amjax', 'amjax_pcg', 'pyamg', 'pyamg_pcg'];
 const METHOD_LABELS = {

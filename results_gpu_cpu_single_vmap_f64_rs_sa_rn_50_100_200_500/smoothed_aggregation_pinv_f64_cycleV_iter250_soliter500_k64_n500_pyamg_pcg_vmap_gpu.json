@@ -1,0 +1,20 @@
+{
+  "config": {
+    "solver": "smoothed_aggregation",
+    "coarse_solver": "pinv",
+    "dtype": "f64",
+    "tol": 1e-08,
+    "maxiter_cycle": 250,
+    "maxiter_solv": 500,
+    "vmap_k": 64,
+    "cycle_type": "V",
+    "grid_size": 500,
+    "method": "pyamg_pcg",
+    "smoother": "jacobi",
+    "mode": "vmap",
+    "device": "gpu"
+  },
+  "time": 18.22602511299192,
+  "residual": 2.7715040177215264e-09,
+  "n_iter": null
+}
